@@ -1,4 +1,5 @@
 const express = require('express');
+const authMiddleware = require('../middleware/authMiddleware');
 const Workout = require('../models/Workout');
 const router = express.Router();
 
@@ -12,16 +13,25 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
-// Add a new workout
-router.post('/', async (req, res) => {
-  const { userId, exercises } = req.body;
+router.get('/test', (req, res) => {
+  res.status(200).json({ message: 'Workout route is working!' });
+});
+
+
+// Protected route to add a workout
+router.post('/', authMiddleware, async (req, res) => {
+  console.log('POST /api/workouts with auth hit');
+  const { exercises } = req.body;
+
   try {
-    const newWorkout = new Workout({ userId, exercises });
+    const newWorkout = new Workout({ userId: req.user.id, exercises });
     await newWorkout.save();
     res.status(201).json(newWorkout);
   } catch (error) {
+    console.error('Error in POST /api/workouts:', error.message);
     res.status(400).json({ error: error.message });
   }
 });
+
 
 module.exports = router;
