@@ -1,0 +1,81 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: >-
+          --quiet
+
+    steps:
+      # Checkout code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # Copy .env file for backend
+      - name: Copy .env file
+        run: |
+          mkdir -p "Gym Workout Record System/server"
+          echo -e "MONGO_URI=mongodb://localhost:27017/test\nJWT_SECRET=testsecret\nPORT=5000" > "Gym Workout Record System/server/.env"
+
+      # Install backend dependencies
+      - name: Install backend dependencies
+        working-directory: "Gym Workout Record System/server"
+        run: npm install
+
+      # Debug ESLint Config
+      - name: Debug ESLint Config
+        working-directory: "Gym Workout Record System/server"
+        run: cat eslint.config.js
+
+      # Install ESLint Plugins Globally
+      - name: Install ESLint Plugins Globally
+        run: npm install -g eslint eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-plugin-import @babel/eslint-parser @babel/preset-react
+
+      # Run backend unit tests
+      - name: Run backend unit tests
+        working-directory: "Gym Workout Record System/server"
+        run: npm run test:unit
+
+      - name: Run backend integration tests
+        working-directory: "Gym Workout Record System/server"
+        run: npm run test:integration
+
+
+      # Install frontend dependencies
+      - name: Install frontend dependencies
+        working-directory: "Gym Workout Record System/client"
+        run: npm install
+
+      # Run frontend tests
+      - name: Run frontend tests
+        working-directory: "Gym Workout Record System/client"
+        run: npm test
+
+      # Lint backend
+      - name: Lint backend
+        working-directory: "Gym Workout Record System/server"
+        run: npx eslint .
+
+      # Lint frontend
+      - name: Lint frontend
+        working-directory: "Gym Workout Record System/client"
+        run: npx eslint .
