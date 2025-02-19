@@ -16,7 +16,9 @@ services:
     depends_on:
       - mongodb
     environment:
-      MONGO_URI: mongodb://mongodb:27017/workoutDB?authSource=admin
+      - MONGO_URI=mongodb://mongodb:27017/workoutDB
+      - JWT_SECRET=your_jwt_secret_here
+      - NODE_ENV=development
 
   client:
     build: ./client
@@ -25,6 +27,8 @@ services:
       - "3000:3000"
     depends_on:
       - server
+    environment:
+      - REACT_APP_WS_URL=ws://localhost:5000
 
 volumes:
   mongo-data:

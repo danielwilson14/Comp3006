@@ -1,22 +1,39 @@
-import './App.css';
-import React, { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import NavigationBar from './components/NavigationBar.js';
+import Login from './pages/Login.js';
+import Register from './pages/Register.js';
+import Home from './pages/MainPage.js';
+import AddWorkout from './pages/AddWorkout.js';
+import ViewWorkouts from './pages/ViewWorkouts.js';
+import WorkoutStats from './pages/WorkoutStats.js';
+import UpdateProfile from './pages/UpdateProfile.js';
 
-function App() {
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    fetch("http://localhost:5000/")
-      .then((response) => response.text())
-      .then((data) => setMessage(data))
-      .catch((error) => console.error("Error fetching data:", error));
-  }, []);
-
+const App = ({ RouterProvider = BrowserRouter }) => {
   return (
-    <div>
-      <h1>Gym Workout Record System</h1>
-      <p>{message}</p>
-    </div>
+    <RouterProvider>
+      <ConditionalNavigationBar />
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/add-workout" element={<AddWorkout />} />
+        <Route path="/view-workouts" element={<ViewWorkouts />} />
+        <Route path="/workout-stats" element={<WorkoutStats />} />
+        <Route path="/update-profile" element={<UpdateProfile />} />
+      </Routes>
+    </RouterProvider>
   );
-}
+};
 
 export default App;
+
+const ConditionalNavigationBar = () => {
+  const location = useLocation();
+  const excludedPaths = ['/login', '/register'];
+  if (excludedPaths.includes(location.pathname)) {
+    return null;
+  }
+
+  return <NavigationBar />;
+};
